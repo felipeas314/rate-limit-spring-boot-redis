@@ -33,7 +33,7 @@ public class RedisConfig
     }
 
     @Bean
-    ProxyManager<String> proxyManager(CacheManager cacheManager) {
+    ProxyManager proxyManager(CacheManager cacheManager) {
         return new JCacheProxyManager<>(cacheManager.getCache("cache"));
     }
 

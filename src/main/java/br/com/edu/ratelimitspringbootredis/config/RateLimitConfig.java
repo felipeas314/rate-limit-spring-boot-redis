@@ -28,12 +28,12 @@ public class RateLimitConfig {
     @Bean
     public Bucket resolveBucket() {
         Supplier<BucketConfiguration> configSupplier = getConfigSupplierForUser();
-        return buckets.builder().build("rate_limit_teste", configSupplier);
+        return buckets.builder().build("rate_limit", configSupplier);
     }
 
     private Supplier<BucketConfiguration> getConfigSupplierForUser() {
         return () -> (BucketConfiguration.builder()
-                .addLimit(l -> l.capacity(5).refillIntervally(5,Duration.ofMinutes(5)))
+                .addLimit(l -> l.capacity(5).refillIntervally(5,Duration.ofMinutes(1)))
                 .build());
     }
 }

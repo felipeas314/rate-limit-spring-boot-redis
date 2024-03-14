@@ -16,15 +16,14 @@ public class RateLimitController
     @Autowired
     private Bucket bucket;
 
-    @GetMapping("/user/{id}")
-    public ResponseEntity<?> getInfo()
-    {
-        //+Bucket bucket = rateLimitConfig.resolveBucket("id");
+    @GetMapping("/ratelimit")
+    public ResponseEntity<?> getInfo() {
+
         if(bucket.tryConsume(1))
         {
-            return ResponseEntity.status(200).body("Success for user ");
+            return ResponseEntity.status(200).body("Success");
         }else {
-            return ResponseEntity.status(429).body("Rate limit exceeded for user ");
+            return ResponseEntity.status(429).body("Rate limit exceeded");
         }
 
     }
