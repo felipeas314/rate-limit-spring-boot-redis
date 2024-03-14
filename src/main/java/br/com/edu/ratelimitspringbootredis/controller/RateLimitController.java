@@ -11,18 +11,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/")
-public class RateLimitController
-{
+public class RateLimitController {
     @Autowired
     private Bucket bucket;
 
     @GetMapping("/ratelimit")
     public ResponseEntity<?> getInfo() {
 
-        if(bucket.tryConsume(1))
-        {
+        if(bucket.tryConsume(1)) {
             return ResponseEntity.status(200).body("Success");
-        }else {
+        } else {
             return ResponseEntity.status(429).body("Rate limit exceeded");
         }
 

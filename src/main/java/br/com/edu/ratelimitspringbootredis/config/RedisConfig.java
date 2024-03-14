@@ -15,11 +15,9 @@ import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
 
 @Configuration
-public class RedisConfig
-{
+public class RedisConfig {
     @Bean
-    public Config config()
-    {
+    public Config config() {
         Config config = new Config();
         config.useSingleServer().setAddress("redis://localhost:6379");
         return config;
