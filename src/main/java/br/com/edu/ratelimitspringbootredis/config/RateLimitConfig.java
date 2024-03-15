@@ -18,20 +18,13 @@ public class RateLimitConfig {
     @Autowired
     public ProxyManager buckets;
 
-    /**
-     * @param key
-     * In a production env, the resolveBucket function takes in the key param as an authentication
-     * token(say). Then the relevant user details can be extracted from that token to fetch the
-     * corresponding rate limit details for that particular user from the DB and subsequently
-     * process the request according to those details.
-     * */
     @Bean
     public Bucket resolveBucket() {
-        Supplier<BucketConfiguration> configSupplier = getConfigSupplierForUser();
+        Supplier<BucketConfiguration> configSupplier = getConfig();
         return buckets.builder().build("rate_limit", configSupplier);
     }
 
-    private Supplier<BucketConfiguration> getConfigSupplierForUser() {
+    private Supplier<BucketConfiguration> getConfig() {
         return () -> (BucketConfiguration.builder()
                 .addLimit(l -> l.capacity(5).refillIntervally(5,Duration.ofMinutes(1)))
                 .build());

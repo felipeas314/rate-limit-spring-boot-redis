@@ -16,7 +16,7 @@ public class RateLimitController {
     private Bucket bucket;
 
     @GetMapping("/ratelimit")
-    public ResponseEntity<?> getInfo() {
+    public ResponseEntity<?> helloRateLimit() {
 
         if(bucket.tryConsume(1)) {
             return ResponseEntity.status(200).body("Success");
