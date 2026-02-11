@@ -1,0 +1,16 @@
+config:
+  target: "http://localhost:8080"
+  phases:
+    - duration: 10
+      arrivalRate: 5
+      name: "Burst de requisições para testar rate limiting"
+
+scenarios:
+  - name: "GET /ratelimit"
+    flow:
+      - get:
+          url: "/ratelimit"
+          expect:
+            - statusCode:
+                - 200
+                - 429

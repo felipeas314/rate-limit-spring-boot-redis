@@ -1,38 +1,51 @@
 package br.com.edu.ratelimitspringbootredis.config;
 
-import com.giffing.bucket4j.spring.boot.starter.config.cache.SyncCacheResolver;
-import com.giffing.bucket4j.spring.boot.starter.config.cache.jcache.JCacheCacheResolver;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
-import io.github.bucket4j.grid.jcache.JCacheProxyManager;
+import io.github.bucket4j.redis.redisson.Bucket4jRedisson;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
-import org.redisson.jcache.configuration.RedissonConfiguration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-import javax.cache.spi.CachingProvider;
 
 @Configuration
 public class RedisConfig {
+
+    @Value("${redis.mode:single}")
+    private String redisMode;
+
+    @Value("${redis.address:redis://localhost:6379}")
+    private String redisAddress;
+
+    @Value("${redis.sentinel.master-name:}")
+    private String sentinelMasterName;
+
+    @Value("${redis.sentinel.addresses:}")
+    private String sentinelAddresses;
+
+    @Value("${redis.cluster.addresses:}")
+    private String clusterAddresses;
+
     @Bean
-    public Config config() {
+    public RedissonClient redissonClient() {
         Config config = new Config();
-        config.useSingleServer().setAddress("redis://localhost:6379");
-        return config;
+        switch (redisMode) {
+            case "sentinel" -> config.useSentinelServers()
+                    .setMasterName(sentinelMasterName)
+                    .addSentinelAddress(sentinelAddresses.split(","));
+            case "cluster" -> config.useClusterServers()
+                    .addNodeAddress(clusterAddresses.split(","));
+            default -> config.useSingleServer()
+                    .setAddress(redisAddress);
+        }
+        return Redisson.create(config);
     }
 
     @Bean
-    public CacheManager cacheManager(Config config) {
-        CacheManager manager = Caching.getCachingProvider().getCacheManager();
-        manager.createCache("cache", RedissonConfiguration.fromConfig(config));
-        return manager;
+    public ProxyManager<String> proxyManager(RedissonClient redissonClient) {
+        return Bucket4jRedisson
+                .casBasedBuilder(((Redisson) redissonClient).getCommandExecutor())
+                .build();
     }
-
-    @Bean
-    ProxyManager proxyManager(CacheManager cacheManager) {
-        return new JCacheProxyManager<>(cacheManager.getCache("cache"));
-    }
-
 }
